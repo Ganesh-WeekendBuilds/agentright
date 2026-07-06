@@ -1,0 +1,278 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/Ganesh-WeekendBuilds/agentright/main/packages/core/src/schema/agent-identity.json",
+  "title": "AgentRight Identity Schema v1",
+  "description": "A 16-field identity schema for AI agents. Designed for governance, compliance, and trust scoring across any agent framework.",
+  "type": "object",
+  "required": [
+    "agent_id",
+    "agent_type",
+    "model_provider",
+    "model_version",
+    "owner_id",
+    "authorizer_id",
+    "permissions",
+    "behavioral_bounds",
+    "created_at",
+    "expires_at"
+  ],
+  "properties": {
+    "agent_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique cryptographic identifier for this agent instance."
+    },
+    "class_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Link to the approved agent template in the enterprise model registry. Enables Class Identity verification."
+    },
+    "agent_type": {
+      "type": "string",
+      "enum": [
+        "analytical",
+        "transacting",
+        "orchestrator",
+        "compliance",
+        "assistant",
+        "custom"
+      ],
+      "description": "Classification of the agent's structural role."
+    },
+    "risk_tier": {
+      "type": "string",
+      "enum": [
+        "tier1_critical",
+        "tier2_elevated",
+        "tier3_standard"
+      ],
+      "default": "tier3_standard",
+      "description": "Risk classification. Tier 1 (Critical): lending, payments, trading. Tier 2 (Elevated): customer-facing, data access. Tier 3 (Standard): internal tools, summarization. Drives audit frequency, TTL limits, and governance requirements."
+    },
+    "model_provider": {
+      "type": "string",
+      "description": "The foundation model provider powering this agent (e.g., anthropic, openai, meta, mistral, local)."
+    },
+    "model_version": {
+      "type": "string",
+      "description": "Specific model version or hash. Critical for model inventory compliance and audit traceability."
+    },
+    "configuration_hash": {
+      "type": "string",
+      "description": "SHA-256 hash of the agent's system prompt and tool definitions. If this changes at runtime, the agent's identity is invalidated."
+    },
+    "owner_id": {
+      "type": "string",
+      "description": "The human, team, or business unit legally responsible for this agent. Must resolve to a real person or organizational entity."
+    },
+    "authorizer_id": {
+      "type": "string",
+      "description": "The identity of the user or system that initiated the current task. Binds every agent action to a human authorization event."
+    },
+    "permissions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "resource",
+          "actions"
+        ],
+        "properties": {
+          "resource": {
+            "type": "string",
+            "description": "The system, API, or data source this permission grants access to."
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "read",
+                "write",
+                "execute",
+                "delete",
+                "delegate"
+              ]
+            },
+            "description": "Permitted operations on this resource."
+          },
+          "scope": {
+            "type": "string",
+            "description": "Optional scope constraint (e.g., 'last_90_days', 'customer_id:12345', 'read_only')."
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When this specific permission expires. Should be equal to or earlier than the agent's top-level expires_at."
+          }
+        }
+      },
+      "description": "Enumerated list of permitted actions. Each permission specifies a resource, allowed operations, and optional scope constraints."
+    },
+    "behavioral_bounds": {
+      "type": "object",
+      "properties": {
+        "purpose": {
+          "type": "string",
+          "description": "The approved business purpose for this agent (e.g., 'Auto-loan document verification')."
+        },
+        "max_token_budget": {
+          "type": "integer",
+          "description": "Maximum tokens this agent may consume per session."
+        },
+        "allowed_tools": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Explicit list of tools/APIs the agent is permitted to invoke."
+        },
+        "forbidden_actions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Actions the agent is explicitly prohibited from taking (e.g., 'send_email', 'delete_records', 'external_api_call')."
+        },
+        "escalation_triggers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Conditions under which the agent must pause and escalate to a human (e.g., 'confidence_below_0.7', 'amount_exceeds_10000')."
+        },
+        "data_horizon": {
+          "type": "string",
+          "description": "Time window constraint on data access (e.g., 'last_90_days'). Prevents agents from accessing full historical records when only recent data is needed."
+        }
+      },
+      "description": "Hard constraints on agent behavior. Defines what the agent is allowed and forbidden to do."
+    },
+    "delegation_chain": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "from_id",
+          "to_id",
+          "scope",
+          "timestamp"
+        ],
+        "properties": {
+          "from_id": {
+            "type": "string",
+            "description": "The delegating entity (human or parent agent)."
+          },
+          "to_id": {
+            "type": "string",
+            "description": "The receiving agent."
+          },
+          "scope": {
+            "type": "string",
+            "description": "The specific scope of this delegation. Must be equal to or narrower than the delegator's own scope."
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "signature": {
+            "type": "string",
+            "description": "Cryptographic signature from the delegating entity proving this delegation was authorized."
+          }
+        }
+      },
+      "description": "Ordered lineage of authority from the originating human through each agent in the chain. Enforces the Scope Reduction Principle."
+    },
+    "trust_metadata": {
+      "type": "object",
+      "properties": {
+        "trust_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Composite trust score (0-100) computed from identity completeness, permission hygiene, behavioral consistency, delegation integrity, and configuration integrity."
+        },
+        "accuracy_rate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Ratio of correct outputs to total outputs over the observation window."
+        },
+        "drift_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Measure of behavioral deviation from baseline. 0 = no drift. 1 = completely off baseline."
+        },
+        "anomaly_count": {
+          "type": "integer",
+          "description": "Number of anomalous actions detected in the current observation window."
+        },
+        "last_validated": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp of the most recent trust score computation."
+        }
+      },
+      "description": "Dynamic trust indicators computed from monitoring data. Updated continuously during agent operation."
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this agent identity was created."
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this agent's identity token expires. Must be finite. Recommended maximum: 24 hours for regulated environments."
+    },
+    "regulatory_context": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Applicable compliance frameworks (e.g., 'SR_11-7', 'ECOA', 'REG_B', 'PCI_DSS', 'UDAAP', 'NIST_AI_RMF', 'EU_AI_ACT')."
+    },
+    "data_residency": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Jurisdictions where agent data is permitted to reside (e.g. ['EU','US']). Absent means the runtime provider decides."
+    },
+    "output_routing": {
+      "type": "object",
+      "properties": {
+        "allowed_destinations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "forbidden_destinations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Where agent outputs may or may not be sent."
+    },
+    "provider_dependencies": {
+      "type": "object",
+      "properties": {
+        "model_provider": {
+          "type": "string"
+        },
+        "can_switch": {
+          "type": "boolean"
+        },
+        "locked_to": {
+          "type": "string"
+        }
+      },
+      "description": "Runtime provider portability posture. Makes vendor lock-in explicit and auditable."
+    }
+  },
+  "additionalProperties": false
+}

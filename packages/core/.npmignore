@@ -1,0 +1,4 @@
+src/*.ts
+src/adapters/
+tsconfig.json
+*.tgz

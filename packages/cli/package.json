@@ -1,0 +1,37 @@
+{
+  "name": "agentright",
+  "version": "0.3.0",
+  "description": "Pre-deployment governance scanning for AI agents. Scan configs, get trust scores, gate deployments.",
+  "license": "MIT",
+  "author": "Ganeshmoorthy Buvanendran",
+  "bin": {
+    "agentright": "dist/cli.js"
+  },
+  "main": "dist/cli.js",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@agentright/core": "^0.3.0",
+    "js-yaml": "^4.1.0"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.5.0"
+  },
+  "keywords": [
+    "ai",
+    "agents",
+    "governance",
+    "trust",
+    "preflight",
+    "nist",
+    "compliance",
+    "ci-cd"
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "name": "agentright-web",
+  "version": "0.2.0",
+  "private": true,
+  "description": "AgentRight \u2014 The open-source governance platform for AI agents",
+  "author": "Ganeshmoorthy Buvanendran",
+  "license": "MIT",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "next": "^14.2.0",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0",
+    "jspdf": "^2.5.1",
+    "jspdf-autotable": "^3.8.2",
+    "@agentright/core": "^0.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "typescript": "^5.5.0"
+  }
+}

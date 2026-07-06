@@ -1,0 +1,27 @@
+{
+  "agent_id": "660e8400-e29b-41d4-a716-446655440002",
+  "agent_type": "assistant",
+  "model_provider": "openai",
+  "model_version": "gpt-4o",
+  "owner_id": "support-team",
+  "authorizer_id": "system:auto-deploy",
+  "permissions": [
+    {
+      "resource": "customer_database",
+      "actions": ["read", "write"]
+    },
+    {
+      "resource": "email_service",
+      "actions": ["read", "execute"]
+    },
+    {
+      "resource": "internal_wiki",
+      "actions": ["read"]
+    }
+  ],
+  "behavioral_bounds": {
+    "purpose": "Customer support automation"
+  },
+  "created_at": "2026-03-15T00:00:00Z",
+  "expires_at": "2027-03-15T00:00:00Z"
+}

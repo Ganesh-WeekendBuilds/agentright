@@ -1,0 +1,24 @@
+{
+  "name": "@agentright/core",
+  "version": "0.3.0",
+  "description": "AgentRight scoring engine \u2014 pre-deployment governance assessment for AI agents",
+  "license": "MIT",
+  "author": "Ganeshmoorthy Buvanendran",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "src/schema"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.0"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "typescript": "^5.5.0"
+  }
+}

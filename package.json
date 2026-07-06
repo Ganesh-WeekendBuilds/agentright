@@ -1,0 +1,20 @@
+{
+  "name": "agentright-monorepo",
+  "version": "0.3.0",
+  "private": true,
+  "description": "AgentRight \u2014 pre-deployment governance for AI agents. One scoring engine, many front doors.",
+  "license": "MIT",
+  "author": "Ganeshmoorthy Buvanendran",
+  "workspaces": [
+    "packages/core",
+    "packages/cli",
+    "apps/web"
+  ],
+  "scripts": {
+    "build": "npm run build -w @agentright/core && npm run build -w agentright && npm run build -w agentright-web",
+    "build:core": "npm run build -w @agentright/core",
+    "build:cli": "npm run build -w agentright",
+    "build:web": "npm run build -w agentright-web",
+    "scan": "node packages/cli/dist/cli.js scan"
+  }
+}

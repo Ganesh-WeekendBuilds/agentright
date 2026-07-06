@@ -1,0 +1,83 @@
+name: "AgentRight Preflight"
+description: "Pre-deployment governance scan for AI agent configs. Fails the build if trust score is below threshold."
+author: "Ganeshmoorthy Buvanendran"
+branding:
+  icon: "shield"
+  color: "blue"
+
+inputs:
+  config:
+    description: "Path to the agent config file (JSON or YAML). Supports native, MCP, and CrewAI formats."
+    required: true
+  threshold:
+    description: "Minimum passing trust score (0-100). Build fails below this. Default 50."
+    required: false
+    default: "50"
+  fail-on-gap:
+    description: "Fail if any gap of this severity or higher exists: critical, high, medium, low, or none. Default none (score-only)."
+    required: false
+    default: "none"
+
+outputs:
+  score:
+    description: "The trust score (0-100)."
+    value: ${{ steps.scan.outputs.score }}
+  grade:
+    description: "Letter grade A-F."
+    value: ${{ steps.scan.outputs.grade }}
+  pass:
+    description: "true if score >= threshold."
+    value: ${{ steps.scan.outputs.pass }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Run AgentRight scan
+      id: scan
+      shell: bash
+      run: |
+        set -e
+        RESULT=$(npx --yes agentright scan "${{ inputs.config }}" --json)
+        echo "$RESULT" > /tmp/agentright-result.json
+
+        SCORE=$(echo "$RESULT" | node -e "let d='';process.stdin.on('data',c=>d+=c).on('end',()=>{const r=JSON.parse(d);const a=Array.isArray(r)?r:[r];console.log(Math.min(...a.map(x=>x.trust_score)))})")
+        GRADE=$(echo "$RESULT" | node -e "let d='';process.stdin.on('data',c=>d+=c).on('end',()=>{const r=JSON.parse(d);const a=Array.isArray(r)?r:[r];const w=a.reduce((p,x)=>x.trust_score<p.trust_score?x:p);console.log(w.grade)})")
+
+        echo "score=$SCORE" >> "$GITHUB_OUTPUT"
+        echo "grade=$GRADE" >> "$GITHUB_OUTPUT"
+
+        THRESHOLD="${{ inputs.threshold }}"
+        echo ""
+        echo "AgentRight trust score: $SCORE/100 (Grade $GRADE)  |  threshold: $THRESHOLD"
+        echo ""
+
+        # Human-readable scan to the log
+        npx --yes agentright scan "${{ inputs.config }}" || true
+
+        PASS=true
+        if [ "$SCORE" -lt "$THRESHOLD" ]; then PASS=false; fi
+        echo "pass=$PASS" >> "$GITHUB_OUTPUT"
+
+        # Optional severity gate
+        SEV="${{ inputs.fail-on-gap }}"
+        if [ "$SEV" != "none" ]; then
+          HIT=$(echo "$RESULT" | node -e "
+            let d='';process.stdin.on('data',c=>d+=c).on('end',()=>{
+              const order={critical:0,high:1,medium:2,low:3};
+              const want=order['$SEV'];
+              const r=JSON.parse(d);const a=Array.isArray(r)?r:[r];
+              const hit=a.some(x=>(x.gaps||[]).some(g=>order[g.severity]<=want));
+              console.log(hit?'1':'0');
+            })")
+          if [ "$HIT" = "1" ]; then
+            echo "AgentRight: found gap at or above severity '$SEV'. Failing build."
+            exit 2
+          fi
+        fi
+
+        if [ "$PASS" = "false" ]; then
+          echo "AgentRight: score $SCORE is below threshold $THRESHOLD. Failing build."
+          exit 2
+        fi
+
+        echo "AgentRight: passed."
