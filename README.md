@@ -8,15 +8,9 @@ All scoring is rule-based and deterministic. Same config, same score, every time
 
 ## Scan anything, not just our format
 
-AgentRight scores whatever agent artifacts you already have:
+AgentRight scores whatever agent artifacts you already have. Native configs using the 16-field schema, popular agent framework configs, and orchestration definitions are all supported. Framework configs get mapped onto the canonical model automatically.
 
-| Input | Example |
-|---|---|
-| Native configs (16-field schema) | `agent.json`, `agent.yaml` |
-| MCP server configs | `.mcp.json`, `claude_desktop_config.json` |
-| CrewAI definitions | `agents.yaml` |
-
-Framework configs get mapped onto the canonical model. Gaps split into two kinds: things you did not configure, and things your framework **cannot express**. The second kind sets a governance ceiling: the maximum score achievable in that format. In testing against real-world examples, popular agent frameworks structurally cap out at a failing grade because their config formats have no fields for identity, ownership, expiry, or data sovereignty.
+Gaps split into two kinds: things you did not configure, and things your framework cannot express. The second kind sets a governance ceiling: the maximum score achievable in that format. AgentRight computes this automatically for each supported framework.
 
 ## Quick start
 
@@ -45,7 +39,7 @@ For multi-agent files, the worst agent's score gates the build. Note that `fail-
 
 ## How scoring works
 
-Five weighted dimensions:
+Six weighted dimensions:
 
 | Dimension | Weight | Question it answers |
 |---|---|---|
@@ -88,6 +82,10 @@ curl -X POST https://agentright.vercel.app/api/scan \
 ```
 
 Returns the full scan result plus a `pass` boolean. Agents can self-register at boot. Pipelines can gate on the `X-AgentRight-Pass` header.
+
+## Disclaimer
+
+AgentRight scores reflect schema completeness against this project's governance rubric. Scores do not constitute security audits, penetration tests, or certification of any kind. The tool evaluates declarative configuration files only and makes no claims about runtime behavior.
 
 ## License
 
