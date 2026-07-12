@@ -1,15 +1,22 @@
 # agentright
 
-Pre-deployment governance scanning for AI agents. Scan a config, get a trust score, gate your deployments.
+CLI for AgentRight. Scan agent configs from the terminal.
+
+Supports native configs and popular agent framework definitions. Exit codes are CI/CD-native: `0` pass (score >= 50), `2` fail, `1` error.
+
+## Usage
 
 ```bash
-npx agentright scan your-config.json
+npx agentright scan agent-config.json
 ```
 
-Supports native configs, MCP server configs, and CrewAI definitions. Exit codes are CI/CD-native: `0` pass (score >= 50), `2` fail, `1` error.
+## Options
 
 ```bash
-agentright scan config.json --json    # machine-readable output
+agentright scan <file>         # scan a config file
+agentright scan <file> --json  # JSON output for piping
 ```
 
-Part of [AgentRight](https://github.com/Ganesh-WeekendBuilds/agentright). MIT License.
+## License
+
+MIT
