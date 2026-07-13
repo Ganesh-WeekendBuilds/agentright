@@ -85,7 +85,11 @@ Returns the full scan result plus a `pass` boolean. Agents can self-register at 
 
 ## Disclaimer
 
+AgentRight is an independent open source project built for learning and research purposes.
+
 AgentRight scores reflect schema completeness against this project's governance rubric. Scores do not constitute security audits, penetration tests, or certification of any kind. The tool evaluates declarative configuration files only and makes no claims about runtime behavior.
+
+This software is provided as is, without warranty of any kind, express or implied. The author accepts no liability for any use, misuse, modification, or distribution of this software, or for any decisions made based on its output. Deployment decisions remain the sole responsibility of the user. See the LICENSE file for full terms.
 
 ## License
 
